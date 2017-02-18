@@ -21,7 +21,8 @@
   },
   "autoload": {
     "psr-4": {
-      "ZeroConfig\\Preacher\\Installer\\": "src"
+      "ZeroConfig\\Preacher\\Installer\\": "src",
+      "ZeroConfig\\Preacher\\": "../preacher/src"
     }
   },
   "extra": {
