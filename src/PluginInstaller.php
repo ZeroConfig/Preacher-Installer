@@ -64,6 +64,6 @@ class PluginInstaller extends LibraryInstaller
     private function getBundleClass(PackageInterface $package): string
     {
         var_dump($package->getTargetDir(), $package->getAutoload());
-        exit
+        exit;
     }
 }
