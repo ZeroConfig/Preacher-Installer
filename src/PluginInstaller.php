@@ -6,27 +6,26 @@ use Composer\Installer\LibraryInstaller;
 use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\Repository\InstalledRepositoryInterface;
-use ZeroConfig\Preacher\Environment;
 
 class PluginInstaller extends LibraryInstaller
 {
-    /** @var Environment */
-    private $environment;
+    /** @var PluginManagerInterface */
+    private $pluginManager;
 
     /**
      * Constructor.
      *
-     * @param IOInterface $inputOutput
-     * @param Composer    $composer
-     * @param Environment $environment
+     * @param IOInterface            $inputOutput
+     * @param Composer               $composer
+     * @param PluginManagerInterface $pluginManager
      */
     public function __construct(
         IOInterface $inputOutput,
         Composer $composer,
-        Environment $environment
+        PluginManagerInterface $pluginManager
     ) {
         parent::__construct($inputOutput, $composer, 'preacher-plugin');
-        $this->environment = $environment;
+        $this->pluginManager = $pluginManager;
     }
 
     /**
@@ -42,7 +41,8 @@ class PluginInstaller extends LibraryInstaller
         PackageInterface $package
     ) {
         parent::install($repo, $package);
-        $class = $this->getBundleClass($package);
+        $this->pluginManager->addPlugin($package);
+        $this->pluginManager->exportPlugins($this->filesystem);
     }
 
     /**
@@ -60,7 +60,9 @@ class PluginInstaller extends LibraryInstaller
         PackageInterface $target
     ) {
         parent::update($repo, $initial, $target);
-        $class = $this->getBundleClass($target);
+        $this->pluginManager->removePlugin($initial);
+        $this->pluginManager->addPlugin($target);
+        $this->pluginManager->exportPlugins($this->filesystem);
     }
 
     /**
@@ -75,15 +77,8 @@ class PluginInstaller extends LibraryInstaller
         InstalledRepositoryInterface $repo,
         PackageInterface $package
     ) {
-        $class = $this->getBundleClass($package);
         parent::uninstall($repo, $package);
-    }
-
-    private function getBundleClass(PackageInterface $package): string
-    {
-        var_dump(
-            $package->getExtra()
-        );
-        return $package->getName();
+        $this->pluginManager->removePlugin($package);
+        $this->pluginManager->exportPlugins($this->filesystem);
     }
 }

@@ -23,7 +23,11 @@ class InstallerPlugin implements PluginInterface
         $composer
             ->getInstallationManager()
             ->addInstaller(
-                new PluginInstaller($inputOutput, $composer, $environment)
+                new PluginInstaller(
+                    $inputOutput,
+                    $composer,
+                    new PluginManager($environment)
+                )
             );
     }
 }
