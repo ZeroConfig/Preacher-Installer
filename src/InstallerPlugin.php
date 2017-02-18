@@ -91,6 +91,6 @@ class InstallerPlugin implements PluginInterface, EventSubscriberInterface
      */
     public function clearCache()
     {
-        $this->cacheClearer->run();
+        $this->getCacheClearer()->run();
     }
 }
