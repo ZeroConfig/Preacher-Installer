@@ -46,6 +46,24 @@ class PluginInstaller extends LibraryInstaller
     }
 
     /**
+     * Update the given plugin.
+     *
+     * @param InstalledRepositoryInterface $repo
+     * @param PackageInterface             $initial
+     * @param PackageInterface             $target
+     *
+     * @return void
+     */
+    public function update(
+        InstalledRepositoryInterface $repo,
+        PackageInterface $initial,
+        PackageInterface $target
+    ) {
+        parent::update($repo, $initial, $target);
+        $class = $this->getBundleClass($target);
+    }
+
+    /**
      * Remove the given plugin.
      *
      * @param InstalledRepositoryInterface $repo
@@ -64,6 +82,5 @@ class PluginInstaller extends LibraryInstaller
     private function getBundleClass(PackageInterface $package): string
     {
         var_dump($package->getTargetDir(), $package->getAutoload());
-        exit;
     }
 }
