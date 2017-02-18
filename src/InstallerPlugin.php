@@ -25,7 +25,14 @@ class InstallerPlugin implements PluginInterface, EventSubscriberInterface
      */
     public function getCacheClearer(): Application
     {
+        static $autoLoader = __DIR__ . '/../../../autoload.php';
+
         if ($this->cacheClearer === null) {
+            if (file_exists($autoLoader)) {
+                /** @noinspection PhpIncludeInspection */
+                require $autoLoader;
+            }
+
             $this->cacheClearer = new Application(
                 new AppKernel('prod', true)
             );
@@ -93,7 +100,10 @@ class InstallerPlugin implements PluginInterface, EventSubscriberInterface
     public function clearCache()
     {
         $this->getCacheClearer()->run(
-            new ArrayInput(['--no-warmup'])
+            new ArrayInput([
+                'cache:clear',
+                '--no-warmup' => true
+            ])
         );
     }
 }
