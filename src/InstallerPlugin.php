@@ -6,6 +6,7 @@ use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
 use ZeroConfig\Preacher\AppKernel;
 use ZeroConfig\Preacher\Environment;
 
@@ -91,6 +92,8 @@ class InstallerPlugin implements PluginInterface, EventSubscriberInterface
      */
     public function clearCache()
     {
-        $this->getCacheClearer()->run();
+        $this->getCacheClearer()->run(
+            new ArrayInput(['--no-warmup'])
+        );
     }
 }
