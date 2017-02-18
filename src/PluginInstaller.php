@@ -63,6 +63,7 @@ class PluginInstaller extends LibraryInstaller
 
     private function getBundleClass(PackageInterface $package): string
     {
-        ddd($package->getTargetDir(), $package->getAutoload());
+        var_dump($package->getTargetDir(), $package->getAutoload());
+        exit
     }
 }
