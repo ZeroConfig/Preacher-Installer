@@ -7,6 +7,7 @@ use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Process\Process;
 use ZeroConfig\Preacher\AppKernel;
 use ZeroConfig\Preacher\Environment;
 
@@ -17,6 +18,12 @@ class InstallerPlugin implements PluginInterface, EventSubscriberInterface
 
     /** @var Application */
     private $cacheClearer;
+
+    /** @var bool */
+    private $isActivated = false;
+
+    /** @var IOInterface */
+    private $prompt;
 
     /**
      * Get the Preacher cache clearer.
@@ -77,6 +84,9 @@ class InstallerPlugin implements PluginInterface, EventSubscriberInterface
                     )
                 )
             );
+
+        $this->prompt      = $inputOutput;
+        $this->isActivated = true;
     }
 
     /**
@@ -99,11 +109,35 @@ class InstallerPlugin implements PluginInterface, EventSubscriberInterface
      */
     public function clearCache()
     {
-        $this->getCacheClearer()->run(
-            new ArrayInput([
-                'cache:clear',
-                '--no-warmup' => true
-            ])
+        // When called outside of a Composer environment, this can be solved safely.
+        if (!$this->isActivated) {
+            $this->getCacheClearer()->run(
+                new ArrayInput(
+                    [
+                        'cache:clear',
+                        '--no-warmup' => true
+                    ]
+                )
+            );
+            return;
+        }
+
+        // When running inside of Composer, we have a contaminated Symfony kernel.
+        // Therefore, we directly invoke the Preacher console.
+        $process = new Process(
+            'bin/console cache:clear',
+            __DIR__ . '/../../preacher'
+        );
+
+        $process->mustRun(
+            function (string $type, string $buffer): void {
+                if ($type !== Process::OUT) {
+                    $this->prompt->writeError($buffer, false);
+                    return;
+                }
+
+                $this->prompt->write($buffer, false);
+            }
         );
     }
 }
